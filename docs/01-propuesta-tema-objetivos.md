@@ -100,8 +100,8 @@ rendimiento, escalabilidad y seguridad.
 
 - [x] Tema enviado para aprobación (propuesta propia, adaptación del tema f).
 - [x] Retroalimentación del profesor incorporada.
-- [x] Aprobación final registrada — **medio: Microsoft Teams** (fecha de
-      registro en este repositorio: 2026-08-09).
+- [x] Aprobación final registrada — **medio: Microsoft Teams**, **fecha:
+      2026-08-03**.
 
 El tema y los objetivos de este documento quedan **confirmados** para el
 resto del proyecto; los siguientes entregables (Semana 12 en adelante) se
