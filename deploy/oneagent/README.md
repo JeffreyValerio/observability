@@ -1,5 +1,26 @@
 # OneAgent — despliegue como contenedor
 
+## 0. ¿Ya tienes OneAgent instalado en el host?
+
+Este `deploy/docker-compose.yml` puede levantar OneAgent por ti, pero ese
+servicio (`oneagent`) está detrás del **profile `with-oneagent`** y por
+defecto **no se activa**. Hay dos escenarios:
+
+- **Ya instalaste OneAgent manualmente en el host** (por ejemplo, con el
+  instalador de Dynatrace directamente sobre tu máquina, sin Docker): no
+  actives el profile. Basta con `docker compose up --build --scale app=3 -d`.
+  OneAgent, al estar instalado en modo full-stack sobre el host, detecta
+  automáticamente cualquier contenedor nuevo (`frontend`, `app`, `redis`,
+  `load-generator`) apenas se levanta — no hace falta "agregar más hosts":
+  la arquitectura de este proyecto es intencionalmente de **un solo host**
+  con varios contenedores simulando nodos (ver
+  [`docs/01-propuesta-tema-objetivos.md`](../../docs/01-propuesta-tema-objetivos.md#6-alcance-y-limitaciones)).
+- **No tienes OneAgent en el host todavía:** usa el profile
+  `with-oneagent` (sección 3) para que Docker Compose lo instale.
+
+⚠️ No actives el profile si ya instalaste OneAgent manualmente: quedarían
+dos instalaciones compitiendo por el mismo host.
+
 Este proyecto usa el patrón oficial de Dynatrace para desplegar OneAgent
 como contenedor "full-stack" en el host donde corre Docker, de forma que
 observa tanto el sistema operativo del host como todos los contenedores del
@@ -8,7 +29,7 @@ stack (`frontend`, `app`, `redis`, `load-generator`).
 Referencia oficial: *Set up Dynatrace OneAgent as a Docker container*
 (https://docs.dynatrace.com/docs/ingest-from/setup-on-container-platforms/docker/set-up-dynatrace-oneagent-as-docker-container).
 
-## 1. Obtener credenciales del tenant
+## 1. Obtener credenciales del tenant (solo si vas a usar el profile `with-oneagent`)
 
 1. Crear o usar un tenant de Dynatrace (SaaS trial gratuito:
    https://www.dynatrace.com/trial/).
@@ -29,6 +50,13 @@ cp .env.example .env
 ```
 
 Completar `DT_ENVIRONMENT_URL`, `ONEAGENT_INSTALLER_TOKEN` y `DT_API_TOKEN`.
+
+Levantar el stack activando el profile:
+
+```bash
+cd deploy
+docker compose --profile with-oneagent up --build --scale app=3 -d
+```
 
 ## 3. Notas sobre el contenedor de OneAgent
 

@@ -2,9 +2,20 @@ services:
   # Agente de Dynatrace: recolecta métricas del SO, procesos y red del host
   # y de los demás contenedores, y las envía al tenant de Dynatrace.
   # Ver deploy/oneagent/README.md para el detalle de las variables usadas.
+  #
+  # Este servicio está detrás del profile "with-oneagent" y NO se levanta
+  # con un `docker compose up` normal. Solo úsalo si tu host todavía no
+  # tiene OneAgent instalado (`docker compose --profile with-oneagent up`).
+  # Si ya instalaste OneAgent directamente en el host (fuera de Docker),
+  # NO actives este profile: tendrías dos instalaciones de OneAgent
+  # compitiendo por el mismo host. En ese caso, el OneAgent del host detecta
+  # automáticamente los contenedores nuevos (frontend/app/redis/load-generator)
+  # en cuanto se levantan, sin configuración adicional.
   oneagent:
     image: dynatrace/oneagent:latest
     container_name: oneagent
+    profiles:
+      - with-oneagent
     privileged: true
     pid: host
     network_mode: host

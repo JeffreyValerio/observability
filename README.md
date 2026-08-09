@@ -72,21 +72,46 @@ Detalle completo en [`docs/arquitectura.md`](docs/arquitectura.md).
 ## Demo funcional (quick start)
 
 Requisitos: Docker + Docker Compose, y un tenant de Dynatrace (SaaS trial
-gratuito válido) con un token de instalación de OneAgent y un token de API.
+gratuito válido) con acceso a Davis AI y Workflows.
+
+El proyecto corre en **un solo host** (tu máquina): los "nodos" que se
+observan son contenedores (`frontend`, N réplicas de `app`, `redis`,
+`load-generator`), no máquinas físicas separadas — ver limitaciones en
+[`docs/01-propuesta-tema-objetivos.md`](docs/01-propuesta-tema-objetivos.md#6-alcance-y-limitaciones).
+
+Hay dos formas de tener OneAgent en ese host, según si ya lo instalaste o no:
+
+**A) Ya tienes OneAgent instalado en el host** (fuera de Docker): solo
+levanta el resto del stack; OneAgent detecta los contenedores nuevos
+automáticamente, sin configuración adicional.
 
 ```bash
-cp .env.example .env
-# completar DT_ENVIRONMENT_URL, ONEAGENT_INSTALLER_TOKEN y DT_API_TOKEN en .env
-
 cd deploy
 docker compose up --build --scale app=3 -d
 ```
+
+**B) Todavía no tienes OneAgent en el host:** activa el profile
+`with-oneagent` para que Docker Compose lo instale por ti (ver
+[`deploy/oneagent/README.md`](deploy/oneagent/README.md) para los tokens
+requeridos en `.env`).
+
+```bash
+cp .env.example .env
+# completar DT_ENVIRONMENT_URL y ONEAGENT_INSTALLER_TOKEN en .env
+
+cd deploy
+docker compose --profile with-oneagent up --build --scale app=3 -d
+```
+
+> ⚠️ No mezclar A y B: activar el profile `with-oneagent` cuando el host ya
+> tiene OneAgent instalado manualmente produce dos instalaciones compitiendo
+> por el mismo host.
 
 Esto levanta:
 
 | Servicio        | Rol                                                         |
 |------------------|--------------------------------------------------------------|
-| `oneagent`       | Instala OneAgent en el host/contenedores y envía telemetría a Dynatrace |
+| `oneagent`       | (solo con el profile `with-oneagent`) Instala OneAgent en el host y envía telemetría a Dynatrace |
 | `frontend`       | Balanceador nginx que distribuye tráfico entre las réplicas de `app` |
 | `app`            | Servicio Flask de ejemplo con endpoints normales y endpoints `/chaos/*` que simulan anomalías (spike de CPU/memoria) |
 | `redis`          | Dependencia de almacenamiento, para observar un sistema con más de un componente |
