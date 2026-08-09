@@ -106,3 +106,7 @@ rendimiento, escalabilidad y seguridad.
 El tema y los objetivos de este documento quedan **confirmados** para el
 resto del proyecto; los siguientes entregables (Semana 12 en adelante) se
 construyen sobre esta versión.
+
+---
+
+[⬅ Volver al inicio](../README.md)
