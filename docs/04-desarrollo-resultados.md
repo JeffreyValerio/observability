@@ -44,3 +44,7 @@ Davis AI.)*
 *(Documentar aquí cualquier cambio necesario respecto al plan de la Semana
 12, por ejemplo ajustes a `CHAOS_PROBABILITY`, duración de la línea base, o
 cambios en los umbrales/sensibilidad de Davis AI.)*
+
+---
+
+[⬅ Volver al inicio](../README.md)

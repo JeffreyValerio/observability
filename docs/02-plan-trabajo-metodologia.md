@@ -61,3 +61,7 @@ Desglose de la Semana 14 (la de mayor peso técnico):
 - **Falsos positivos/negativos de Davis AI** ante cargas sintéticas poco
   realistas: mitigar generando una línea base de tráfico normal suficiente
   antes de inyectar anomalías.
+
+---
+
+[⬅ Volver al inicio](../README.md)

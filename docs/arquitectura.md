@@ -74,3 +74,7 @@ a Kubernetes multi-nodo sin cambiar los roles de los componentes: OneAgent
 se despliega como DaemonSet, `app` como Deployment con HPA, y el Workflow de
 Dynatrace no cambia. Esa migración queda fuera del alcance de este proyecto
 (ver limitaciones en `docs/01-propuesta-tema-objetivos.md`).
+
+---
+
+[⬅ Volver al inicio](../README.md)

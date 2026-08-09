@@ -20,3 +20,7 @@ Carpeta para versionar los dashboards de Dynatrace usados en la Semana 14
 
 No se incluye un dashboard exportado por defecto en este repositorio porque
 depende del tenant y de los datos reales generados durante la Semana 14.
+
+---
+
+[⬅ Volver al inicio](../README.md)

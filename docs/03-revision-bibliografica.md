@@ -86,3 +86,7 @@ contenedorizados.)*
 - [ ] Completar la sección 2.4 con literatura sobre alta disponibilidad y
       seguridad en contenedores.
 - [ ] Citar en formato consistente (APA) en el informe final.
+
+---
+
+[⬅ Volver al inicio](../README.md)

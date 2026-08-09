@@ -60,3 +60,7 @@ Semana 11.)*
 - Enlace al repositorio GitHub.
 - Capturas de pantalla del demo funcional.
 - Exportaciones de dashboards (`dashboards/`).
+
+---
+
+[⬅ Volver al inicio](../README.md)
