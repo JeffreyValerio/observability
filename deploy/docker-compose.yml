@@ -44,6 +44,7 @@ services:
       - app
     networks:
       - demo
+    restart: unless-stopped
 
   app:
     build: ./app
@@ -55,12 +56,14 @@ services:
       - redis
     networks:
       - demo
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     container_name: redis
     networks:
       - demo
+    restart: unless-stopped
 
   load-generator:
     build: ./load-generator
@@ -72,6 +75,7 @@ services:
       - frontend
     networks:
       - demo
+    restart: unless-stopped
 
 networks:
   demo:
