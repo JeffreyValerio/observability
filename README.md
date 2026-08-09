@@ -96,13 +96,13 @@ Instrucciones detalladas de OneAgent en [`deploy/oneagent/README.md`](deploy/one
 
 ## Cronograma y evaluación
 
-| Semana | Entregable | Estado |
-|---|---|---|
-| 11 | Definición de tema y objetivos | [`docs/01-propuesta-tema-objetivos.md`](docs/01-propuesta-tema-objetivos.md) |
-| 12 | Plan de trabajo y metodología | [`docs/02-plan-trabajo-metodologia.md`](docs/02-plan-trabajo-metodologia.md) |
-| 13 | Revisión bibliográfica / marco teórico | [`docs/03-revision-bibliografica.md`](docs/03-revision-bibliografica.md) |
-| 14 | Desarrollo y análisis de resultados | [`docs/04-desarrollo-resultados.md`](docs/04-desarrollo-resultados.md) |
-| 15 | Informe final y presentación | [`docs/05-informe-final.md`](docs/05-informe-final.md) |
+| Semana | Actividad | Entregable | Estado |
+|---|---|---|---|
+| 11 | Definición de tema y objetivos | [`docs/01-propuesta-tema-objetivos.md`](docs/01-propuesta-tema-objetivos.md) | ✅ Aprobado |
+| 12 | Plan de trabajo y metodología | [`docs/02-plan-trabajo-metodologia.md`](docs/02-plan-trabajo-metodologia.md) | ✅ Finalizado |
+| 13 | Revisión bibliográfica / marco teórico | [`docs/03-revision-bibliografica.md`](docs/03-revision-bibliografica.md) | ✅ Finalizado |
+| 14 | Desarrollo y análisis de resultados | [`docs/04-desarrollo-resultados.md`](docs/04-desarrollo-resultados.md) | ⏳ Pendiente |
+| 15 | Informe final y presentación | [`docs/05-informe-final.md`](docs/05-informe-final.md) | ⏳ Pendiente |
 
 ## Licencia
 

@@ -20,7 +20,7 @@
 
 ## 2. Marco teórico
 
-*(Consolidar el [marco teórico](03-revision-bibliografica.md#2-marco-teórico-borrador)
+*(Consolidar el [marco teórico](03-revision-bibliografica.md#2-marco-teórico)
 de `docs/03-revision-bibliografica.md`.)*
 
 ## 3. Metodología
@@ -63,7 +63,7 @@ planteado en la Semana 11.)*
 ## 9. Referencias
 
 *(Lista final en formato APA, a partir de las
-[referencias semilla](03-revision-bibliografica.md#1-referencias-semilla) de
+[referencias](03-revision-bibliografica.md#1-referencias) de
 `docs/03-revision-bibliografica.md`.)*
 
 ## 10. Anexos

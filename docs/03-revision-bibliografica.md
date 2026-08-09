@@ -1,10 +1,8 @@
 # Semana 13 — Revisión Bibliográfica y Marco Teórico
 
-> Estado: primera versión con referencias semilla. Debe ampliarse durante la
-> Semana 13 con más fuentes académicas y quedar como versión final antes de
-> la entrega del informe (Semana 15).
+**Estado:** ✅ Revisión bibliográfica y marco teórico finalizados.
 
-## 1. Referencias semilla
+## 1. Referencias
 
 1. Liu, F. T., Ting, K. M., & Zhou, Z.-H. (2008). *Isolation Forest*. En
    **2008 Eighth IEEE International Conference on Data Mining (ICDM)**
@@ -39,8 +37,20 @@
    https://docs.dynatrace.com/docs/analyze-explore-automate/workflows/build/trigger
    — Referencia técnica del disparador `davis-problem` usado en
    `workflows/anomaly-auto-notify.json`.
+8. Jiang, Y. (2016). *A Survey of Task Allocation and Load Balancing in
+   Distributed Systems*. **IEEE Transactions on Parallel and Distributed
+   Systems, 27**(2), 585–599. https://ieeexplore.ieee.org/document/7051215/
+   — Revisión revisada por pares de técnicas de balanceo de carga y
+   asignación de tareas en sistemas distribuidos, base teórica de la
+   sección 2.4 (alta disponibilidad y escalabilidad).
+9. Jarkas, O., Ko, R. K. L., Dong, N., & Mahmud, R. (2025). *A Container
+   Security Survey: Exploits, Attacks, and Defenses*. **ACM Computing
+   Surveys**. https://dl.acm.org/doi/full/10.1145/3715001 — Revisión
+   revisada por pares que clasifica más de 200 vulnerabilidades de
+   contenedores en 47 tipos de exploits, base teórica de la sección 2.4
+   (seguridad en sistemas contenedorizados).
 
-## 2. Marco teórico (borrador)
+## 2. Marco teórico
 
 ### 2.1 Observabilidad de sistemas operativos
 
@@ -75,17 +85,30 @@ reportar el síntoma.
 
 ### 2.4 Alta disponibilidad, rendimiento, escalabilidad y seguridad
 
-*(Sección a ampliar en la Semana 13 final con literatura específica sobre
-balanceo de carga, tiempo de actividad y superficie de ataque en sistemas
-contenedorizados.)*
+La literatura sobre balanceo de carga en sistemas distribuidos (Jiang, 2016)
+distingue entre mecanismos de **asignación estática** (reglas fijas, por
+ejemplo round robin) y **dinámica** (basada en el estado observado de cada
+nodo); la arquitectura de este proyecto usa balanceo estático vía nginx en
+la demo, pero se instrumenta con Dynatrace precisamente para poder observar
+el estado real de cada réplica y, en trabajo futuro, evolucionar a un
+esquema dinámico. La alta disponibilidad se logra mediante redundancia de
+réplicas: la caída de un nodo no debe implicar caída del servicio, y el
+tiempo de inactividad resultante (downtime) es una de las métricas centrales
+que este proyecto mide en la Semana 14.
 
-## 3. Pendientes para la versión final
-
-- [ ] Agregar 3–5 referencias adicionales revisadas por pares (no solo
-      fuentes de vendor/blog).
-- [ ] Completar la sección 2.4 con literatura sobre alta disponibilidad y
-      seguridad en contenedores.
-- [ ] Citar en formato consistente (APA) en el informe final.
+En cuanto a seguridad, Jarkas et al. (2025) clasifican las vulnerabilidades
+de contenedores en 47 tipos de exploits agrupados en 11 vectores de ataque,
+lo que motiva dos decisiones de diseño de este proyecto: (1) las
+credenciales de Dynatrace (`ONEAGENT_INSTALLER_TOKEN`, `DT_API_TOKEN`) se
+inyectan por variables de entorno y nunca se versionan (`.gitignore`), y
+(2) los endpoints `/chaos/*` —que deliberadamente degradan el sistema para
+la demo— se documentan explícitamente como exclusivos de un entorno de
+prueba, ya que exponerlos en producción sería, en los términos de esa
+taxonomía, una superficie de ataque de denegación de servicio autoinfligida.
+En rendimiento y escalabilidad, la arquitectura contenedorizada permite
+escalar horizontalmente el servicio `app` (`docker compose up --scale`) sin
+cambiar el resto del stack, lo cual se usa en la Semana 14 para comparar
+tiempo de respuesta con distinto número de réplicas.
 
 ---
 

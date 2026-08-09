@@ -1,5 +1,7 @@
 # Semana 12 — Planificación y Metodología
 
+**Estado:** ✅ Plan de trabajo y metodología finalizados.
+
 ## 1. Plan de trabajo
 
 | Semana | Actividad | Entregable |
