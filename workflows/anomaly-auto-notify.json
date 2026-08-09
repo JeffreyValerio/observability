@@ -1,0 +1,56 @@
+{
+  "_note": "Ejemplo ilustrativo de Workflow de Dynatrace para notificar automáticamente cuando Davis AI abre un problema. Los nombres de acción (`action`) de tareas integradas pueden variar entre versiones de Dynatrace: usar este archivo como punto de partida y ajustarlo con el editor visual de Workflows (Settings > Workflows) antes de desplegarlo vía API. Referencia: https://docs.dynatrace.com/docs/analyze-explore-automate/workflows/build/trigger",
+  "title": "anomaly-auto-notify",
+  "description": "Notifica al equipo y registra un evento de auditoría cuando Davis AI detecta una anomalía en el stack de demostración (frontend/app/redis).",
+  "isDeployed": true,
+  "isPrivate": false,
+  "ownerType": "USER",
+  "schemaVersion": 4,
+  "trigger": {
+    "eventTrigger": {
+      "type": "davis-problem",
+      "isActive": true,
+      "filter": {
+        "managementZone": "observability-demo"
+      }
+    }
+  },
+  "tasks": [
+    {
+      "name": "notify_team",
+      "action": "builtin:basic.email",
+      "description": "Envía un correo con el resumen del problema detectado por Davis AI.",
+      "input": {
+        "to": ["equipo-observabilidad@example.com"],
+        "subject": "[Davis AI] Anomalía detectada: {{ event()['davis_problem_title'] }}",
+        "body": "Se detectó una anomalía en el stack de demostración.\n\nTítulo: {{ event()['davis_problem_title'] }}\nEntidad afectada: {{ event()['entity_name'] }}\nURL del problema: {{ event()['davis_problem_url'] }}"
+      },
+      "position": { "x": 0, "y": 0 },
+      "predecessors": [],
+      "timeout": 900
+    },
+    {
+      "name": "log_audit_event",
+      "action": "dynatrace.automations:http-function",
+      "description": "Registra un evento de auditoría en Dynatrace vía API v2 (events/ingest) para trazabilidad del incidente.",
+      "input": {
+        "url": "{{ env('DT_ENVIRONMENT_URL') }}/api/v2/events/ingest",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Api-Token {{ secret('DT_API_TOKEN') }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "eventType": "CUSTOM_INFO",
+          "title": "Workflow anomaly-auto-notify ejecutado",
+          "properties": {
+            "davis_problem_id": "{{ event()['davis_problem_id'] }}"
+          }
+        }
+      },
+      "position": { "x": 0, "y": 1 },
+      "predecessors": ["notify_team"],
+      "timeout": 900
+    }
+  ]
+}

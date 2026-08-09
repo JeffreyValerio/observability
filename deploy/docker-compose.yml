@@ -1,0 +1,70 @@
+services:
+  # Agente de Dynatrace: recolecta métricas del SO, procesos y red del host
+  # y de los demás contenedores, y las envía al tenant de Dynatrace.
+  # Ver deploy/oneagent/README.md para el detalle de las variables usadas.
+  oneagent:
+    image: dynatrace/oneagent:latest
+    container_name: oneagent
+    privileged: true
+    pid: host
+    network_mode: host
+    environment:
+      - ONEAGENT_INSTALLER_SCRIPT_URL=${DT_ENVIRONMENT_URL}/api/v1/deployment/installer/agent/unix/default/latest?arch=x86&flavor=default
+      - ONEAGENT_INSTALLER_TOKEN=${ONEAGENT_INSTALLER_TOKEN}
+      - ONEAGENT_INSTALLER_SKIP_CERT_CHECK=false
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /dev:/dev
+      - /sys:/sys
+      - /etc:/etc
+      - /usr/lib/os-release:/usr/lib/os-release
+      - /var/lib/docker/overlay2:/var/lib/docker/overlay2:ro
+      - oneagent-log:/var/log/dynatrace/oneagent
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:1.27-alpine
+    container_name: frontend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+    networks:
+      - demo
+
+  app:
+    build: ./app
+    # No fijar container_name aquí: se necesita poder escalar con
+    # `docker compose up --scale app=N`.
+    environment:
+      - REDIS_HOST=redis
+    depends_on:
+      - redis
+    networks:
+      - demo
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    networks:
+      - demo
+
+  load-generator:
+    build: ./load-generator
+    container_name: load-generator
+    environment:
+      - FRONTEND_URL=http://frontend
+      - CHAOS_PROBABILITY=${CHAOS_PROBABILITY:-0.05}
+    depends_on:
+      - frontend
+    networks:
+      - demo
+
+networks:
+  demo:
+    driver: bridge
+
+volumes:
+  oneagent-log:
