@@ -10,5 +10,7 @@ venv/
 .DS_Store
 *.log
 
-dynatrace/
-oneagent/
+# artefactos locales de instalación de OneAgent (no la carpeta de docs
+# deploy/oneagent/), por eso se ancla a la raíz del repo:
+/dynatrace/
+/oneagent/
