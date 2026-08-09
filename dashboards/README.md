@@ -15,7 +15,8 @@ Carpeta para versionar los dashboards de Dynatrace usados en la Semana 14
 2. Exportar el dashboard como JSON (`⋮` > *Export to JSON* en la vista del
    dashboard, o `GET /api/config/v1/dashboards/{id}` de la API v1).
 3. Guardar el archivo exportado en esta carpeta, por ejemplo
-   `dashboards/observability-demo.json`, y referenciarlo desde
+   `dashboards/observability-demo.json`, y referenciarlo desde la sección
+   [Resultados](../docs/04-desarrollo-resultados.md#3-resultados) de
    `docs/04-desarrollo-resultados.md`.
 
 No se incluye un dashboard exportado por defecto en este repositorio porque

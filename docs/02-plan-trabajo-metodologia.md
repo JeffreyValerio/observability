@@ -4,26 +4,27 @@
 
 | Semana | Actividad | Entregable |
 |---|---|---|
-| 11 | Definición de tema y objetivos | `docs/01-propuesta-tema-objetivos.md` |
+| 11 | Definición de tema y objetivos | [`docs/01-propuesta-tema-objetivos.md`](01-propuesta-tema-objetivos.md) |
 | 12 | Plan de trabajo y metodología | Este documento |
-| 13 | Búsqueda bibliográfica y marco teórico | `docs/03-revision-bibliografica.md` |
-| 14 | Implementación del demo, generación de anomalías, captura de métricas y análisis de resultados | `docs/04-desarrollo-resultados.md` + stack en `deploy/` |
-| 15 | Redacción del informe final y presentación | `docs/05-informe-final.md` |
+| 13 | Búsqueda bibliográfica y marco teórico | [`docs/03-revision-bibliografica.md`](03-revision-bibliografica.md) |
+| 14 | Implementación del demo, generación de anomalías, captura de métricas y análisis de resultados | [`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md) + stack en [`deploy/`](../deploy/) |
+| 15 | Redacción del informe final y presentación | [`docs/05-informe-final.md`](05-informe-final.md) |
 
 Desglose de la Semana 14 (la de mayor peso técnico):
 
-1. Levantar el stack de `deploy/` (nginx + app + redis + load-generator +
+1. Levantar el stack de [`deploy/`](../deploy/) (nginx + app + redis + load-generator +
    OneAgent) y verificar que el tenant de Dynatrace recibe telemetría.
 2. Generar una línea base de tráfico normal (~30 min) para que Davis AI
    aprenda el comportamiento esperado.
 3. Ejecutar los escenarios de anomalía controlada (`/chaos/cpu`,
    `/chaos/memory`, apagar una réplica) y registrar cuándo Davis abre el
    problema.
-4. Desplegar el Workflow de notificación (`workflows/anomaly-auto-notify.json`)
+4. Desplegar el Workflow de notificación
+   ([`workflows/anomaly-auto-notify.json`](../workflows/anomaly-auto-notify.json))
    y verificar que se dispara ante cada problema.
 5. Exportar métricas (tiempo de respuesta, distribución de tráfico entre
-   réplicas, tiempo de inactividad, tiempo de detección) a
-   `docs/04-desarrollo-resultados.md`.
+   réplicas, tiempo de inactividad, tiempo de detección) a la tabla de
+   [`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#3-resultados).
 
 ## 2. Metodología de investigación
 

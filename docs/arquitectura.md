@@ -73,7 +73,8 @@ La arquitectura se diseñó para poder migrar de Docker Compose (un solo host)
 a Kubernetes multi-nodo sin cambiar los roles de los componentes: OneAgent
 se despliega como DaemonSet, `app` como Deployment con HPA, y el Workflow de
 Dynatrace no cambia. Esa migración queda fuera del alcance de este proyecto
-(ver limitaciones en `docs/01-propuesta-tema-objetivos.md`).
+(ver limitaciones en
+[`docs/01-propuesta-tema-objetivos.md`](01-propuesta-tema-objetivos.md#6-alcance-y-limitaciones)).
 
 ---
 

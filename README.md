@@ -35,7 +35,8 @@ en IA (Dynatrace/Davis AI) para la detección automática de anomalías en un
 sistema distribuido contenedorizado, evaluando alta disponibilidad, rendimiento,
 escalabilidad y seguridad.
 
-Objetivos específicos completos en [`docs/01-propuesta-tema-objetivos.md`](docs/01-propuesta-tema-objetivos.md).
+Objetivos específicos completos en
+[`docs/01-propuesta-tema-objetivos.md`](docs/01-propuesta-tema-objetivos.md#5-objetivos-específicos).
 
 ## Arquitectura (resumen)
 

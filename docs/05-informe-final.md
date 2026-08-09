@@ -13,32 +13,40 @@
 - Contexto: sistemas operativos en red y en la nube, necesidad de
   observabilidad inteligente.
 - Problema de investigación.
-- Objetivo general y específicos (ver `docs/01-propuesta-tema-objetivos.md`).
+- Objetivo general (ver
+  [`docs/01-propuesta-tema-objetivos.md`](01-propuesta-tema-objetivos.md#4-objetivo-general))
+  y objetivos específicos (ver
+  [sección 5 del mismo documento](01-propuesta-tema-objetivos.md#5-objetivos-específicos)).
 
 ## 2. Marco teórico
 
-*(Consolidar `docs/03-revision-bibliografica.md`.)*
+*(Consolidar el [marco teórico](03-revision-bibliografica.md#2-marco-teórico-borrador)
+de `docs/03-revision-bibliografica.md`.)*
 
 ## 3. Metodología
 
-*(Consolidar `docs/02-plan-trabajo-metodologia.md`.)*
+*(Consolidar la [metodología de investigación](02-plan-trabajo-metodologia.md#2-metodología-de-investigación)
+de `docs/02-plan-trabajo-metodologia.md`.)*
 
 ## 4. Arquitectura propuesta
 
-*(Consolidar `docs/arquitectura.md`: diagrama, componentes, decisiones de
-diseño para alta disponibilidad, rendimiento, escalabilidad y seguridad.)*
+*(Consolidar [`docs/arquitectura.md`](arquitectura.md): diagrama, componentes,
+decisiones de diseño para alta disponibilidad, rendimiento, escalabilidad y
+seguridad.)*
 
 ## 5. Implementación
 
-- Entorno: Docker Compose (`deploy/`).
+- Entorno: Docker Compose ([`deploy/`](../deploy/)).
 - Instrumentación: OneAgent, Davis AI, Workflow de notificación
-  (`workflows/anomaly-auto-notify.json`).
+  ([`workflows/anomaly-auto-notify.json`](../workflows/anomaly-auto-notify.json)).
 - Repositorio: enlace a GitHub, licencia MIT, README con demo funcional.
 
 ## 6. Resultados
 
-*(Consolidar `docs/04-desarrollo-resultados.md`: tablas de métricas,
-capturas de dashboards, análisis.)*
+*(Consolidar la tabla de
+[resultados](04-desarrollo-resultados.md#3-resultados) de
+`docs/04-desarrollo-resultados.md`: tablas de métricas, capturas de
+dashboards, análisis.)*
 
 ## 7. Discusión y mejoras propuestas
 
@@ -48,18 +56,21 @@ recursos, alertas adicionales, políticas de seguridad de red.)*
 
 ## 8. Conclusiones
 
-*(Relacionar cada conclusión con un objetivo específico planteado en la
-Semana 11.)*
+*(Relacionar cada conclusión con un
+[objetivo específico](01-propuesta-tema-objetivos.md#5-objetivos-específicos)
+planteado en la Semana 11.)*
 
 ## 9. Referencias
 
-*(Lista final en formato APA, a partir de `docs/03-revision-bibliografica.md`.)*
+*(Lista final en formato APA, a partir de las
+[referencias semilla](03-revision-bibliografica.md#1-referencias-semilla) de
+`docs/03-revision-bibliografica.md`.)*
 
 ## 10. Anexos
 
 - Enlace al repositorio GitHub.
 - Capturas de pantalla del demo funcional.
-- Exportaciones de dashboards (`dashboards/`).
+- Exportaciones de dashboards ([`dashboards/`](../dashboards/)).
 
 ---
 
