@@ -1,10 +1,10 @@
 # Semana 11 — Definición del Tema y Objetivos
 
 **Curso:** Sistemas Operativos II
-**Estado:** Propuesta enviada — pendiente de aprobación del profesor
+**Estado:** ✅ Tema aprobado por el profesor
 **Tema del enunciado:** Opción (f) *Monitor inteligente de sistema (anomaly detection)*
 
-## 1. Título tentativo
+## 1. Título
 
 Monitoreo Inteligente de Sistemas Operativos en Entornos de Red y Nube:
 Detección de Anomalías con Observabilidad basada en IA (Dynatrace / Davis AI)
@@ -98,9 +98,11 @@ rendimiento, escalabilidad y seguridad.
 
 ## 7. Coordinación con el profesor
 
-- [ ] Tema enviado para aprobación (propuesta propia, adaptación del tema f).
-- [ ] Retroalimentación del profesor incorporada.
-- [ ] Aprobación final registrada (fecha / medio: Teams o correo).
+- [x] Tema enviado para aprobación (propuesta propia, adaptación del tema f).
+- [x] Retroalimentación del profesor incorporada.
+- [x] Aprobación final registrada — **medio: Microsoft Teams** (fecha de
+      registro en este repositorio: 2026-08-09).
 
-*(Actualizar esta sección con la fecha real y el resultado de la coordinación
-con el profesor.)*
+El tema y los objetivos de este documento quedan **confirmados** para el
+resto del proyecto; los siguientes entregables (Semana 12 en adelante) se
+construyen sobre esta versión.

@@ -25,8 +25,8 @@ raíz sin depender únicamente de umbrales estáticos. Un **Workflow** de
 Dynatrace se encarga de notificar/actuar automáticamente cuando Davis abre un
 problema.
 
-> Este tema es una **propuesta** en evaluación. Ver [`docs/01-propuesta-tema-objetivos.md`](docs/01-propuesta-tema-objetivos.md)
-> para la definición formal pendiente de aprobación del profesor (Semana 11).
+> ✅ Tema aprobado por el profesor. Ver [`docs/01-propuesta-tema-objetivos.md`](docs/01-propuesta-tema-objetivos.md)
+> para la definición formal (Semana 11).
 
 ## Objetivo general
 
