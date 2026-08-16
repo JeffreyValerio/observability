@@ -71,6 +71,9 @@ planteado en la Semana 11.)*
 - Enlace al repositorio GitHub.
 - Capturas de pantalla del demo funcional.
 - Exportaciones de dashboards ([`dashboards/`](../dashboards/)).
+- Comparativa de herramientas de observabilidad y Cuadrante Mágico de
+  Gartner 2025
+  ([`docs/06-comparativa-herramientas.md`](06-comparativa-herramientas.md)).
 
 ---
 

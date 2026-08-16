@@ -51,6 +51,11 @@ anomalías ya resuelto por la industria.
   observabilidad real en lugar de una implementación académica desde cero,
   manteniendo los mismos conceptos exigidos: lectura de métricas del SO,
   arquitectura cliente-servidor para el envío de métricas y monitoreo remoto.
+- Dynatrace no es la única opción válida: Grafana/Prometheus, New Relic y
+  Splunk son alternativas igual de competentes (todas Líderes del
+  Cuadrante Mágico de Gartner 2025, salvo Prometheus en solitario). La
+  comparativa objetiva y los criterios de elección están documentados en
+  [`docs/06-comparativa-herramientas.md`](06-comparativa-herramientas.md).
 
 ## 4. Objetivo general
 

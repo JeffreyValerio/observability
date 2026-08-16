@@ -129,6 +129,16 @@ Instrucciones detalladas de OneAgent en [`deploy/oneagent/README.md`](deploy/one
 | 14 | Desarrollo y análisis de resultados | [`docs/04-desarrollo-resultados.md`](docs/04-desarrollo-resultados.md) | ⏳ Pendiente |
 | 15 | Informe final y presentación | [`docs/05-informe-final.md`](docs/05-informe-final.md) | ⏳ Pendiente |
 
+## Documentación adicional
+
+No forman parte del cronograma de semanas 11–15, pero sustentan la
+justificación de herramienta y la presentación final:
+
+| Documento | Contenido |
+|---|---|
+| [`docs/06-comparativa-herramientas.md`](docs/06-comparativa-herramientas.md) | Comparativa objetiva Dynatrace vs. Grafana/Prometheus vs. New Relic vs. Splunk, con el Cuadrante Mágico de Gartner 2025 |
+| [`docs/07-presentacion.md`](docs/07-presentacion.md) | Guion de la presentación final (5–10 min), slide por slide |
+
 ## Licencia
 
 Este proyecto se distribuye bajo la licencia [MIT](LICENSE).
