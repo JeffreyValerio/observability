@@ -1,9 +1,47 @@
 # Semana 14 — Desarrollo y Análisis de Resultados
 
-> Estado: plantilla a completar después de ejecutar el demo (`deploy/`)
-> contra un tenant real de Dynatrace. No se deben reportar aquí números
-> inventados; cada tabla se llena con datos exportados de Dynatrace o del
-> propio stack.
+> Estado: la **mecánica del stack** (sección 0) ya se probó y quedó
+> verificada. Lo que falta es correr los mismos escenarios contra un tenant
+> real de Dynatrace (secciones 1-3) para capturar la parte de Davis AI. No
+> se deben reportar en la sección 3 números inventados; cada fila se llena
+> con datos exportados de Dynatrace o del propio stack.
+
+## 0. Verificación de infraestructura (sin Dynatrace)
+
+Antes de instrumentar con Dynatrace, se verificó que el stack de
+[`deploy/`](../deploy/) funciona correctamente por sí solo (`docker compose
+build` + `up --scale app=3`, sin el profile `with-oneagent`):
+
+| Prueba | Resultado |
+|---|---|
+| Build de `app` y `load-generator` | ✅ Ambas imágenes construyen sin errores |
+| Balanceo de carga (`frontend` → 3 réplicas de `app`) | ✅ Confirmado: requests sucesivos a `/` devolvieron 3 hostnames de contenedor distintos |
+| Contador en `redis` por réplica (`/work`) | ✅ Confirmado: el contador se incrementa correctamente por hostname |
+| `POST /chaos/cpu` | ✅ Confirmado con `docker stats`: la réplica objetivo subió a 100–111% de CPU durante la ventana solicitada |
+| `POST /chaos/memory` | ✅ Confirmado: `mb_allocated` reportado coincide con lo solicitado |
+| `load-generator` (tráfico normal + caos automático) | ✅ Confirmado en logs: alterna `[normal]` y `[chaos:cpu]`/`[chaos:memory]` según `CHAOS_PROBABILITY` |
+| Caída de una réplica (`docker stop` sobre un contenedor `app`) | ⚠️ Ver hallazgo abajo |
+
+**Hallazgo real (no un dato inventado):** al detener una réplica en pleno
+tráfico, nginx **sí** redirige el tráfico nuevo hacia las réplicas activas
+(0 fallos en 10 requests secuenciales de verificación manual), pero los
+logs de `frontend` registraron **1 `upstream timed out`** durante la
+ventana de transición, generado por una request del `load-generator` que
+alcanzó a resolver la IP del contenedor ya detenido antes de que expirara
+la caché DNS (`resolver ... valid=10s` en
+[`deploy/nginx/nginx.conf`](../deploy/nginx/nginx.conf)). Es decir, el
+tiempo de inactividad real de este diseño **no es cero**: está acotado por
+ese TTL de resolución DNS, no por un health check activo. Esto es un
+hallazgo genuino para la sección 3 (Escenario 4) y ya está anotado como
+mejora propuesta en
+[`docs/05-informe-final.md`](05-informe-final.md#7-discusión-y-mejoras-propuestas)
+(pasar a un `upstream` con *passive health checks* o reducir el TTL del
+resolver).
+
+Estas pruebas se corrieron **sin** Dynatrace (fuera del alcance de este
+entorno de ejecución, que no tiene el tenant del usuario). Confirman que el
+stack está listo para instrumentarse; lo que sigue (secciones 1-3) requiere
+correrlo contra un tenant real y capturar lo que ve Davis AI.
 
 ## 1. Experimentos planeados
 

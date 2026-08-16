@@ -50,9 +50,20 @@ dashboards, análisis.)*
 
 ## 7. Discusión y mejoras propuestas
 
-*(Basado en los resultados: qué anomalías detectó bien Davis AI, cuáles no,
-qué mejoraría la arquitectura — por ejemplo más réplicas, límites de
-recursos, alertas adicionales, políticas de seguridad de red.)*
+*(Completar con lo observado en Davis AI: qué anomalías detectó bien,
+cuáles no, comparado contra los escenarios inyectados de
+[`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#1-experimentos-planeados).)*
+
+**Mejora ya identificada durante la verificación de infraestructura** (ver
+[`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#0-verificación-de-infraestructura-sin-dynatrace)):
+al caer una réplica, nginx solo deja de enrutar tráfico hacia ella cuando
+expira la caché de resolución DNS (`resolver ... valid=10s`), no de forma
+inmediata — se registró un `upstream timed out` real durante esa ventana.
+Una mejora concreta sería reemplazar el `proxy_pass` basado en variable +
+`resolver` por un bloque `upstream` con *passive health checks*
+(`max_fails` / `fail_timeout`), o adoptar un balanceador con *health
+checks* activos, para acotar el tiempo de inactividad a algo menor que el
+TTL actual.
 
 ## 8. Conclusiones
 
