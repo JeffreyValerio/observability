@@ -98,9 +98,10 @@ selectivo con línea base, para evitar falsos positivos.
 
 ## Slide 8 — Conclusiones (30s)
 
-- De los 6 objetivos específicos: **5 cumplidos completamente**, **1
-  parcial** (falta disparar el Workflow de notificación — único pendiente
-  real del proyecto). Detalle en
+- De los 6 objetivos específicos: **los 6 cumplidos**, incluido el
+  Workflow de notificación — desplegado y disparado de verdad contra el
+  tenant (queda solo un ajuste de permisos de cuenta para que la ejecución
+  termine en éxito). Detalle en
   [`docs/05-informe-final.md`](05-informe-final.md#8-conclusiones).
 - Los 5 escenarios planeados se ejecutaron en las dos corridas; los
   resultados están documentados con datos reales, incluidos los que no

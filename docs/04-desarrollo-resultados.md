@@ -163,6 +163,36 @@ Semana 14:**
   cual reduce falsos positivos pero también hace más difícil que
   anomalías breves o moderadas abran un problema.
 
+### 3.3 Despliegue y prueba real del Workflow (17 de agosto de 2026)
+
+Se desplegó [`workflows/anomaly-auto-notify.json`](../workflows/anomaly-auto-notify.json)
+contra el tenant real vía la API de Automation (`POST
+/platform/automation/v1/workflows`, con scopes OAuth
+`automation:workflows:read/write/run`):
+
+| Paso | Resultado |
+|---|---|
+| Crear el workflow (`POST .../workflows`) | ✅ HTTP 201 — id real `5bc00c4c-2f54-4a31-8d3a-36837e781327`, `isDeployed: true` |
+| Disparar manualmente (`POST .../workflows/{id}/run`) | ✅ HTTP 201 — ejecución real creada, `trigger: jeffreyvalerio@hotmail.com` |
+| Estado final de la ejecución (`GET .../executions/{id}`) | ⚠️ `state: ERROR` |
+
+**Causa del error (real, no una falla del diseño del workflow):** el
+motor de Automation devolvió *"Could not run workflow task on behalf of
+[usuario]. Please ensure Authorization Settings are configured for this
+user"*. Es decir, la definición del workflow es válida (la API la aceptó
+sin objeciones) y la ejecución sí se disparó — falta un paso de
+configuración de permisos en la consola del tenant (habilitar
+*Authorization Settings* para que el motor de Automation pueda ejecutar
+tareas en nombre del usuario dueño del OAuth client), que es una
+configuración de cuenta que solo el propietario del tenant puede hacer
+desde la UI, no vía esta API.
+
+**Conclusión de este experimento:** el objetivo específico 4 (configurar
+un Workflow de notificación automática) queda **verificado hasta el punto
+de despliegue y disparo real**; el único paso que falta para ver una
+ejecución en `SUCCESS` es una configuración manual de permisos, ya
+documentada en el propio archivo del workflow (campo `_pendiente`).
+
 ## 4. Ajustes a la metodología
 
 Respecto al plan original de la Semana 12:

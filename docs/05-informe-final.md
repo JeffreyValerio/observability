@@ -1,9 +1,11 @@
 # Semana 15 — Informe Final
 
 **Estado:** ✅ **Cerrado**, con las dos corridas experimentales completas
-(16 y 17 de agosto de 2026). Único pendiente real: desplegar/disparar el
-Workflow de notificación en el tenant (no bloquea la entrega, queda como
-trabajo futuro documentado).
+(16 y 17 de agosto de 2026) y el Workflow desplegado y disparado
+realmente contra el tenant (17 de agosto). Único pendiente real: un ajuste
+de permisos de cuenta (*Authorization Settings*) para que la ejecución del
+Workflow pase de `ERROR` a `SUCCESS` — es un paso manual en la consola de
+Dynatrace, ya documentado, que no bloquea la entrega.
 
 ## Resumen / Abstract
 
@@ -101,10 +103,12 @@ seguridad.
 - **Instrumentación:** OneAgent (perfil opcional `with-oneagent` en el
   compose, u OneAgent ya instalado en el host — ver
   [`deploy/oneagent/README.md`](../deploy/oneagent/README.md)), Davis AI, y
-  una plantilla de Workflow de notificación
-  ([`workflows/anomaly-auto-notify.json`](../workflows/anomaly-auto-notify.json)) —
-  **definida pero aún no desplegada/disparada** en el tenant real (pendiente
-  para la segunda corrida).
+  un Workflow de notificación
+  ([`workflows/anomaly-auto-notify.json`](../workflows/anomaly-auto-notify.json))
+  — **desplegado y disparado realmente** vía la API de Automation
+  (`docs/04` §3.3): la definición fue aceptada por Dynatrace y la ejecución
+  se disparó de verdad; falta un ajuste de permisos de cuenta para que
+  termine en éxito.
 - **Elección de herramienta:** justificada de forma objetiva (no
   promocional) en
   [`docs/06-comparativa-herramientas.md`](06-comparativa-herramientas.md),
@@ -177,9 +181,15 @@ Una mejora concreta sería reemplazar el `proxy_pass` basado en variable +
 checks* activos, para acotar el tiempo de inactividad a algo menor que el
 TTL actual.
 
-**Mejora pendiente de validar:** desplegar y disparar el Workflow de
-notificación (`workflows/anomaly-auto-notify.json`) contra un problema real
-— quedó definido pero no probado en esta corrida.
+**Workflow de notificación, verificado en vivo** (`docs/04` §3.3): se
+desplegó y disparó realmente contra el tenant (`POST
+/platform/automation/v1/workflows` → HTTP 201; `POST .../{id}/run` → HTTP
+201, ejecución real bajo el usuario de la cuenta). La ejecución terminó en
+`ERROR`, pero por una causa de permisos de cuenta (*Authorization
+Settings* no habilitados para el motor de Automation), no por un problema
+en la definición del workflow — la API aceptó el esquema y el tipo de
+tarea sin objeciones. Queda documentado como el único paso manual
+pendiente del proyecto.
 
 ## 8. Conclusiones
 
@@ -195,10 +205,11 @@ planteado en la Semana 11 con el estado real del proyecto:
    controladas** — ✅ cumplido y verificado end-to-end (`docs/04` §0), con
    los 5 escenarios planeados ejecutados en dos corridas reales.
 4. **Configurar detección de anomalías con IA y un Workflow de
-   notificación** — ⚠️ parcialmente cumplido: la detección con IA está
-   confirmada con dos casos reales (`P-260849`, `P-260850`); el Workflow de
-   notificación está definido pero no se ha desplegado/disparado en el
-   tenant (único pendiente real del proyecto).
+   notificación** — ✅ cumplido: la detección con IA está confirmada con
+   dos casos reales (`P-260849`, `P-260850`); el Workflow se desplegó y se
+   disparó realmente contra el tenant (`docs/04` §3.3). Queda un ajuste de
+   permisos de cuenta (manual, fuera del alcance de la API) para que la
+   ejecución termine en éxito en vez de error.
 5. **Definir y medir métricas de rendimiento y disponibilidad** — ✅
    cumplido: tiempo de respuesta (p50/p95), distribución de tráfico, tiempo
    de inactividad y MTTD tienen datos reales medidos en ambas corridas
@@ -231,10 +242,10 @@ en papel/PDF.)*
 
 - Enlace al repositorio GitHub:
   `https://github.com/JeffreyValerio/observability`.
-- Capturas de pantalla del demo funcional y de los problemas `P-260849` /
-  `P-260850` en Dynatrace — pendientes de adjuntar en la versión de entrega
-  final (los datos ya están documentados en `docs/04`, faltan solo las
-  imágenes).
+- Capturas de pantalla del demo funcional, de los problemas `P-260849` /
+  `P-260850`, y de la ejecución del Workflow (`docs/04` §3.3) en Dynatrace
+  — pendientes de adjuntar en la versión de entrega final (los datos ya
+  están documentados en `docs/04`, faltan solo las imágenes).
 - Exportaciones de dashboards ([`dashboards/`](../dashboards/)) — pendiente
   (depende de tener un dashboard armado en el tenant).
 - Comparativa de herramientas de observabilidad y Cuadrante Mágico de

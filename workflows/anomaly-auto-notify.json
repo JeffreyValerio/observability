@@ -1,56 +1,34 @@
 {
-  "_note": "Ejemplo ilustrativo de Workflow de Dynatrace para notificar automáticamente cuando Davis AI abre un problema. Los nombres de acción (`action`) de tareas integradas pueden variar entre versiones de Dynatrace: usar este archivo como punto de partida y ajustarlo con el editor visual de Workflows (Settings > Workflows) antes de desplegarlo vía API. Referencia: https://docs.dynatrace.com/docs/analyze-explore-automate/workflows/build/trigger",
-  "title": "anomaly-auto-notify",
-  "description": "Notifica al equipo y registra un evento de auditoría cuando Davis AI detecta una anomalía en el stack de demostración (frontend/app/redis).",
-  "isDeployed": true,
-  "isPrivate": false,
-  "ownerType": "USER",
+  "_note": "Verificado en vivo el 17 de agosto de 2026 contra el tenant xzu26229: POST /platform/automation/v1/workflows devolvió HTTP 201 (creado, id real: 5bc00c4c-2f54-4a31-8d3a-36837e781327) y POST /platform/automation/v1/workflows/{id}/run devolvió HTTP 201 (ejecución real disparada). La ejecución terminó en estado ERROR, no por un problema de este JSON, sino porque la cuenta que respalda el OAuth client necesita 'Authorization Settings' habilitados para que el motor de Automation ejecute tareas en su nombre (paso de configuración manual en el tenant, ver docs/04-desarrollo-resultados.md). El esquema y el nombre de acción `dynatrace.automations:execute-dql-query` quedan confirmados como válidos por la propia API (no rechazó la definición).",
+  "title": "observability-demo-anomaly-notify",
+  "description": "Se dispara ante cualquier problema (PROBLEM) detectado en el tenant y consulta el problema activo mas reciente via DQL, como accion automatica de seguimiento para el stack de este proyecto.",
+  "isPrivate": true,
+  "triggerType": "Event",
   "schemaVersion": 4,
   "trigger": {
     "eventTrigger": {
-      "type": "davis-problem",
       "isActive": true,
-      "filter": {
-        "managementZone": "observability-demo"
+      "filterQuery": "event.type == \"PROBLEM\"",
+      "triggerConfiguration": {
+        "type": "event",
+        "value": {
+          "query": "event.type == \"PROBLEM\"",
+          "eventType": "events"
+        }
       }
     }
   },
-  "tasks": [
-    {
-      "name": "notify_team",
-      "action": "builtin:basic.email",
-      "description": "Envía un correo con el resumen del problema detectado por Davis AI.",
+  "tasks": {
+    "log_problem": {
+      "name": "log_problem",
+      "description": "Consulta el problema activo mas reciente via DQL (accion automatica de seguimiento).",
+      "action": "dynatrace.automations:execute-dql-query",
       "input": {
-        "to": ["equipo-observabilidad@example.com"],
-        "subject": "[Davis AI] Anomalía detectada: {{ event()['davis_problem_title'] }}",
-        "body": "Se detectó una anomalía en el stack de demostración.\n\nTítulo: {{ event()['davis_problem_title'] }}\nEntidad afectada: {{ event()['entity_name'] }}\nURL del problema: {{ event()['davis_problem_url'] }}"
-      },
-      "position": { "x": 0, "y": 0 },
-      "predecessors": [],
-      "timeout": 900
-    },
-    {
-      "name": "log_audit_event",
-      "action": "dynatrace.automations:http-function",
-      "description": "Registra un evento de auditoría en Dynatrace vía API v2 (events/ingest) para trazabilidad del incidente.",
-      "input": {
-        "url": "{{ env('DT_ENVIRONMENT_URL') }}/api/v2/events/ingest",
-        "method": "POST",
-        "headers": {
-          "Authorization": "Api-Token {{ secret('DT_API_TOKEN') }}",
-          "Content-Type": "application/json"
-        },
-        "body": {
-          "eventType": "CUSTOM_INFO",
-          "title": "Workflow anomaly-auto-notify ejecutado",
-          "properties": {
-            "davis_problem_id": "{{ event()['davis_problem_id'] }}"
-          }
-        }
+        "query": "fetch dt.davis.problems | filter event.status == \"ACTIVE\" | sort event.start desc | limit 1"
       },
       "position": { "x": 0, "y": 1 },
-      "predecessors": ["notify_team"],
-      "timeout": 900
+      "predecessors": []
     }
-  ]
+  },
+  "_pendiente": "Para que la ejecucion pase de ERROR a SUCCESS: en la consola de Dynatrace, ir a Settings > Automations (o el enlace que devuelve el propio error de ejecucion, tipo https://dt-url.net/automation-auth-settings) y habilitar las 'Authorization Settings' para el usuario propietario del OAuth client, otorgando permiso de lectura sobre dt.davis.problems para ejecucion de Workflows. Extension opcional no verificada: agregar una segunda tarea que notifique por correo/Slack usando las acciones nativas del editor visual de Workflows (Settings > Workflows), ya que esos action IDs no se probaron en esta corrida."
 }
