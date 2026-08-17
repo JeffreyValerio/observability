@@ -50,8 +50,26 @@ dashboards, análisis.)*
 
 ## 7. Discusión y mejoras propuestas
 
-*(Completar con lo observado en Davis AI: qué anomalías detectó bien,
-cuáles no, comparado contra los escenarios inyectados de
+**Primera corrida real (16 de agosto de 2026)** — ver detalle completo en
+[`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#31-primera-corrida-real-contra-dynatrace-16-de-agosto-de-2026):
+Davis AI detectó una anomalía real de memoria (`P-260849 "High Memory"`) en
+~40 segundos desde que arrancó el stack, lo que valida el objetivo
+específico 4 (detección automática de anomalías). Sin embargo, la
+atribución de causa raíz quedó a nivel de **host**, no de contenedor/proceso
+específico, muy probablemente porque los procesos del stack (`gunicorn`,
+`nginx`, `Redis`) eran entidades nuevas en Dynatrace sin historial de línea
+base. El pico de CPU inyectado explícitamente tampoco abrió un problema
+propio en esa ventana corta. Esto sugiere una conclusión relevante para el
+marco teórico (sección 2.3): la IA causal de Davis necesita **tiempo de
+observación previo** para atribuir causa raíz con precisión — no es
+instantánea desde el primer minuto de instrumentar un sistema nuevo. Está
+pendiente una segunda corrida con línea base establecida (~30-60 min de
+tráfico normal antes de inyectar anomalías) para contrastar si mejora la
+atribución.
+
+*(Completar el resto con lo observado en la segunda corrida: qué anomalías
+detectó bien Davis AI con línea base, cuáles no, comparado contra los
+escenarios inyectados de
 [`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#1-experimentos-planeados).)*
 
 **Mejora ya identificada durante la verificación de infraestructura** (ver
