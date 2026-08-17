@@ -14,3 +14,9 @@ venv/
 # deploy/oneagent/), por eso se ancla a la raíz del repo:
 /dynatrace/
 /oneagent/
+
+# skills locales de Claude Code instaladas en esta máquina (no son parte
+# del proyecto académico, se generan al invocar skills como dt-obs-problems)
+/.agents/
+/.claude/
+/skills-lock.json

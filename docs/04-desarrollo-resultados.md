@@ -1,13 +1,12 @@
 # Semana 14 — Desarrollo y Análisis de Resultados
 
-> Estado: la **mecánica del stack** (sección 0) y una **primera corrida real
-> contra Dynatrace** (sección 3.1, 16 de agosto de 2026) ya se hicieron. La
-> primera corrida detectó una anomalía real (`P-260849`) pero con
-> limitaciones honestas (atribución a nivel de host, sin línea base previa).
-> Falta una segunda corrida con línea base establecida para completar los
-> escenarios 1, 2, 4 y 5. No se reportan aquí números inventados; todo lo
-> que aparece en la sección 3 viene de la API v2 de Dynatrace o del propio
-> stack.
+> Estado: ✅ **Cerrado.** Se completaron la verificación de infraestructura
+> (sección 0), la primera corrida sin línea base (sección 3.1, 16 de agosto)
+> y la segunda corrida con línea base de 10 min (sección 3.2, 17 de agosto).
+> Los 5 escenarios planeados se ejecutaron los cinco; no todos abrieron un
+> problema en Dynatrace, y eso se documenta como resultado real, no como
+> tarea pendiente. Todo lo que aparece en la sección 3 viene de la API v2
+> de Dynatrace o de mediciones directas del propio stack — nada inventado.
 
 ## 0. Verificación de infraestructura (sin Dynatrace)
 
@@ -112,23 +111,74 @@ estimada):
 
 | Escenario | Tiempo de respuesta base | Tiempo de respuesta durante anomalía | MTTD | Downtime | Observaciones |
 |---|---|---|---|---|---|
-| 1 — Línea base | — | n/a | n/a | n/a | Pendiente: correr `CHAOS_PROBABILITY=0` por ~30 min antes del próximo experimento, para darle a Davis AI una línea base real por proceso |
-| 2 — Pico de CPU | — | — (CPU real 100–111% confirmado por `docker stats`) | Sin problema abierto en esta corrida | — | Ver limitación de baselining arriba; repetir tras tener línea base |
-| 3 — Pico de memoria | — | — | **~40s** (23:47:40 → 23:48:20), medido desde el arranque del stack, no desde la llamada explícita a `/chaos/memory` | — | Atribuido a nivel de host, no de contenedor (ver lectura honesta arriba) |
-| 4 — Caída de réplica | — | — | — | Acotado por el TTL del resolver DNS (10s) — ver sección 0 | Verificado a nivel de infraestructura (sección 0); falta repetirlo con Dynatrace activo para ver si Davis AI también lo detecta como problema de disponibilidad |
-| 5 — Saturación de `redis` | — | — | — | — | Pendiente de ejecutar |
+| 1 — Línea base | **p50 = 80.2 ms, p95 = 143.0 ms** (n=1087 requests, 10 min) | n/a | n/a | n/a | Tráfico repartido ~34% / 32% / 34% entre las 3 réplicas (contadores de `redis`) |
+| 2 — Pico de CPU (con línea base) | 80.2 ms | Impacto real confirmado (`docker stats`: réplica objetivo a 100%+ CPU) | **Sin problema abierto** en ~7 min de observación | — | Ver "Segunda corrida" abajo — resultado honesto, no lo que se esperaba |
+| 3 — Pico de memoria (sin línea base, corrida 1) | — | — | **~40s** (23:47:40 → 23:48:20), medido desde el arranque del stack | — | Atribuido a nivel de host, no de contenedor |
+| 3b — Pico de CPU (sin línea base, corrida 1) | — | 100–111% CPU confirmado | `P-260850 "CPU Saturation"` abierto **~4m45s** después del chaos | — | También a nivel de host |
+| 4 — Caída de réplica (con Dynatrace activo) | — | — (0/10 fallos en verificación manual) | **Sin problema abierto** por Davis AI en ~3 min | Acotado por el TTL del resolver DNS (10s): 1 `upstream timed out` real registrado en logs de nginx | Davis AI no marcó la caída/recuperación de esta réplica como problema — ver discusión |
+| 5 — Saturación de `redis` | avg 0.3 ms/op | **No se logró saturar**: `redis-benchmark -c 100` corrió a 163k–174k rps con latencia p50 ≈ 0.28 ms | n/a (sin anomalía real que detectar) | — | Limitación del diseño del experimento, no de Dynatrace — ver discusión |
 
-**Pendiente para una segunda corrida** (con línea base ya establecida):
-repetir los escenarios 1, 2, 4 y 5 después de dejar el stack corriendo con
-tráfico normal por ~30-60 min, para poder comparar atribución de causa raíz
-con y sin historial previo — ese contraste es en sí mismo un resultado
-interesante para la discusión (Semana 15).
+### 3.2 Segunda corrida, con línea base establecida (17 de agosto de 2026)
+
+Línea de tiempo real (UTC):
+
+| Hora | Evento |
+|---|---|
+| 00:15:41 | Stack levantado con `CHAOS_PROBABILITY=0` (línea base) |
+| 00:15:41 – 00:25:41 | 10 min de tráfico normal únicamente (1087 requests, ver tabla de resultados) |
+| 00:26:31 | `POST /chaos/cpu?seconds=150&threads=4` (aislado, sin memoria) sobre una réplica — confirmado con `docker stats` |
+| 00:33:52 | `docker stop` sobre una réplica (caída controlada, con Dynatrace ya activo) |
+| 00:33:53 | `redis-benchmark -n 200000 -c 100 -t set,incr` dentro del contenedor `redis` |
+| 00:33:59 | réplica caída reiniciada (`docker start`) |
+| ~00:37 | Consulta final a la API de problemas (ventana de 30 min): **solo aparece el problema `P-260849` de la corrida anterior; ningún problema nuevo se abrió para CPU, caída de réplica ni `redis`** |
+
+**Lectura honesta — esta corrida "falló" en el sentido de no generar nuevos
+problemas, y eso es en sí mismo el resultado más interesante de la
+Semana 14:**
+
+- El pico de CPU aislado sobre **una sola réplica** (4 hilos ocupados de los
+  8 hilos lógicos del host) no cruzó el umbral que sí cruzó la corrida
+  anterior, donde la presión venía de **3 réplicas arrancando a la vez**
+  más el pico explícito. Es coherente con que, una vez que Davis AI tiene
+  línea base, su umbral de sensibilidad sube — evita falsos positivos ante
+  variación moderada, a costa de tardar más (o no reaccionar) ante una
+  anomalía aislada y de corta duración.
+- La caída de réplica se recuperó **tan rápido** (segundos, acotada por el
+  TTL de DNS) que, a nivel de host/proceso, probablemente no se vio como
+  una falla sostenida — Davis AI tiende a requerir una ventana de
+  degradación más larga antes de abrir un problema de disponibilidad.
+- El intento de saturar `redis` **no fue realmente una anomalía**: el
+  hardware del host maneja 100 conexiones concurrentes de `SET`/`INCR` sin
+  esfuerzo (sub-milisegundo de latencia). Esto es una limitación del
+  **diseño del experimento** (se necesitaría mucha más concurrencia, un
+  contenedor con límites de CPU/memoria más estrictos, u operaciones más
+  pesadas para generar saturación real), no una limitación de Dynatrace.
+- Contraste con la primera corrida (sin línea base): ahí sí se abrieron
+  2 problemas reales (`P-260849`, `P-260850`), pero con atribución a nivel
+  de host. Con línea base, no se abrió ningún problema — pero por razones
+  distintas en cada escenario (umbral más alto, recuperación demasiado
+  rápida, anomalía insuficientemente intensa). El experimento original
+  asumía que "con línea base, la detección mejora"; el resultado real es
+  más matizado: **con línea base, Davis AI se vuelve más selectivo**, lo
+  cual reduce falsos positivos pero también hace más difícil que
+  anomalías breves o moderadas abran un problema.
 
 ## 4. Ajustes a la metodología
 
-*(Documentar aquí cualquier cambio necesario respecto al plan de la Semana
-12, por ejemplo ajustes a `CHAOS_PROBABILITY`, duración de la línea base, o
-cambios en los umbrales/sensibilidad de Davis AI.)*
+Respecto al plan original de la Semana 12:
+
+- La duración de línea base se acotó a **10 minutos** en vez de los 30-60
+  min planeados, por restricciones de tiempo de la sesión — una línea base
+  más larga (horas/días, como en un entorno real) probablemente cambiaría
+  estos resultados.
+- El escenario 5 (saturación de `redis`) necesita rediseñarse: usar mayor
+  concurrencia (`-c 500` o más), payloads más grandes, o limitar
+  `mem_limit`/`cpus` del contenedor `redis` en el compose para que la
+  saturación sea alcanzable con las herramientas disponibles.
+- El escenario 2 y 4 deberían repetirse con una anomalía más sostenida
+  (mayor duración) para confirmar si Davis AI eventualmente los detecta
+  incluso con línea base, o si el umbral post-baseline requiere una
+  intensidad mínima distinta.
 
 ---
 

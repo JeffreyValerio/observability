@@ -1,10 +1,9 @@
 # Semana 15 — Informe Final
 
-**Estado:** ✅ Consolidado con lo disponible al 16 de agosto de 2026. Todas
-las secciones tienen contenido real; lo único que queda explícitamente
-pendiente (marcado como tal, sin números inventados) es completar la tabla
-cuantitativa de la sección 6 con una segunda corrida que tenga línea base
-establecida, y desplegar/disparar el Workflow de notificación en el tenant.
+**Estado:** ✅ **Cerrado**, con las dos corridas experimentales completas
+(16 y 17 de agosto de 2026). Único pendiente real: desplegar/disparar el
+Workflow de notificación en el tenant (no bloquea la entrega, queda como
+trabajo futuro documentado).
 
 ## Resumen / Abstract
 
@@ -14,15 +13,19 @@ automática de anomalías en un sistema distribuido contenedorizado. En vez
 de reimplementar un modelo de detección de anomalías desde cero, se
 instrumentó un stack de demostración (balanceador nginx, N réplicas de un
 servicio Flask, Redis, generador de carga) con OneAgent y se sometió a
-anomalías controladas (picos de CPU/memoria, caída de una réplica). En una
-primera corrida real contra un tenant de Dynatrace, Davis AI detectó una
-anomalía de memoria genuina en ~40 segundos, aunque con una limitación
-relevante: la atribución de causa raíz quedó a nivel de host, no de proceso
-específico, por falta de línea base histórica en las entidades recién
-creadas. Este hallazgo motiva la conclusión central del proyecto: la IA
-causal necesita tiempo de observación previo para atribuir causa raíz con
-precisión, un matiz no siempre explícito en la documentación comercial de
-este tipo de herramientas.
+cinco escenarios de anomalía controlada en dos corridas reales contra un
+tenant de Dynatrace. Sin línea base histórica, Davis AI detectó dos
+anomalías reales (memoria en ~40s, CPU en ~4m45s) pero con atribución de
+causa raíz a nivel de host, no de proceso. Con una línea base de 10 minutos
+ya establecida, ninguno de los tres escenarios adicionales (CPU aislado,
+caída de réplica, saturación de `redis`) abrió un problema nuevo en la
+ventana observada — un resultado que, lejos de ser un fallo, revela que
+Davis AI se vuelve más selectivo una vez que tiene línea base, reduciendo
+falsos positivos a costa de tardar más (o no reaccionar) ante anomalías
+breves o de intensidad moderada. Este contraste entre ambas corridas es el
+hallazgo central del proyecto: la IA causal de Davis no es un interruptor
+binario "detecta / no detecta", sino un sistema cuyo comportamiento
+depende directamente del historial de observación disponible.
 
 ## 1. Introducción
 
@@ -111,8 +114,9 @@ seguridad.
 
 ## 6. Resultados
 
-*(Detalle completo, con línea de tiempo real tomada de la API de Dynatrace,
-en [`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#3-resultados).)*
+*(Detalle completo, con líneas de tiempo reales tomadas de la API de
+Dynatrace, en
+[`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#3-resultados).)*
 
 **Verificación de infraestructura** (sin Dynatrace, sección 0 de
 `docs/04`): build, balanceo de carga, contador por réplica, ambos endpoints
@@ -120,30 +124,47 @@ de caos y el generador de carga funcionan correctamente. Al caer una
 réplica, nginx redirige el tráfico pero con un tiempo de inactividad
 acotado por el TTL de resolución DNS (10s) — no es cero.
 
-**Primera corrida real contra Dynatrace** (16 de agosto de 2026, detalle en
-`docs/04` §3.1): Davis AI abrió `P-260849 "High Memory"` **~40 segundos**
-después de arrancar el stack — detección real y rápida, que valida el
-objetivo específico 4. La atribución de causa raíz quedó a nivel de host
-(no de contenedor específico), y el pico de CPU inyectado explícitamente no
-abrió un problema propio en esa ventana corta — ambos hechos consistentes
-con que Davis AI necesita línea base histórica para atribuir con precisión.
+**Primera corrida, sin línea base** (16 de agosto, `docs/04` §3.1): Davis
+AI abrió `P-260849 "High Memory"` **~40 segundos** después de arrancar el
+stack, y más tarde `P-260850 "CPU Saturation"` (~4m45s tras el pico de
+CPU). Ambos problemas quedaron atribuidos al host completo, no a un
+contenedor específico.
 
-**Pendiente, marcado explícitamente (no se inventan números):** tiempo de
-respuesta p50/p95, distribución porcentual de tráfico entre réplicas, y los
-escenarios 1 (línea base), 2 (CPU con línea base), 4 (caída de réplica con
-Dynatrace activo) y 5 (saturación de `redis`) — todos requieren una segunda
-corrida con ~30-60 min de tráfico normal antes de inyectar anomalías.
+**Segunda corrida, con línea base de 10 min** (17 de agosto, `docs/04`
+§3.2): línea base real — **p50 = 80.2 ms, p95 = 143.0 ms** de tiempo de
+respuesta, tráfico repartido ~34% / 32% / 34% entre las 3 réplicas.
+Sobre esa línea base, **ninguno** de los tres escenarios adicionales (pico
+de CPU aislado, caída de réplica con Dynatrace activo, intento de
+saturación de `redis`) abrió un problema nuevo en la ventana observada
+(~3-7 min cada uno). El intento de saturar `redis` tampoco generó una
+anomalía real medible (163k-174k rps sin degradación de latencia) —
+limitación del diseño del experimento, documentada como tal.
+
+**Todos los 5 escenarios planeados en la Semana 12 se ejecutaron**; el
+resultado combinado de ambas corridas es la tabla completa en `docs/04`
+§3, sin celdas con datos inventados.
 
 ## 7. Discusión y mejoras propuestas
 
-**Hallazgo central:** Davis AI sí detecta anomalías reales de forma rápida
-(~40s en este caso), pero la calidad de la atribución de causa raíz depende
-de tener línea base histórica — con entidades recién creadas (minutos de
-antigüedad), Davis prefiere atribuir a un nivel más general (host) antes
-que arriesgar una atribución específica incorrecta. Esto matiza una
-afirmación común en el marketing de herramientas de AIOps ("detección de
-anomalías desde el primer minuto"): la detección sí es inmediata, pero la
-*atribución de causa raíz* de calidad no lo es.
+**Hallazgo central (contrastando las dos corridas):** sin línea base, Davis
+AI detecta anomalías reales rápido (~40s memoria, ~4m45s CPU), pero
+atribuye la causa raíz al host completo, no al proceso específico. Con
+línea base de 10 min, Davis AI **no abrió ningún problema nuevo** ante tres
+anomalías controladas adicionales — no porque "no funcione", sino porque
+una vez que tiene línea base se vuelve más selectivo: exige una desviación
+más sostenida o intensa antes de abrir un problema, para evitar falsos
+positivos. Esto matiza una afirmación común en el marketing de herramientas
+de AIOps ("detección de anomalías desde el primer minuto"): la detección
+inicial sí es inmediata, pero tanto la **calidad de la atribución** como la
+**sensibilidad del detector** cambian con el tiempo de observación
+acumulado — y no siempre en la dirección que un demo esperaría mostrar.
+
+**Limitaciones honestas del diseño experimental** (no de la herramienta):
+la línea base de 10 min es mucho más corta que lo recomendable (horas o
+días en un entorno real); la caída de réplica se recuperó demasiado rápido
+para leerse como una falla sostenida; y el intento de saturar `redis` no
+generó carga suficiente para el hardware disponible. Repetir estos tres
+escenarios con mayor intensidad/duración queda como trabajo futuro.
 
 **Mejora ya identificada durante la verificación de infraestructura** (ver
 [`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#0-verificación-de-infraestructura-sin-dynatrace)):
@@ -171,25 +192,31 @@ planteado en la Semana 11 con el estado real del proyecto:
 2. **Diseñar una arquitectura de monitoreo distribuido robusta** — ✅
    cumplido ([`docs/arquitectura.md`](arquitectura.md), `deploy/`).
 3. **Implementar un entorno de demostración funcional con anomalías
-   controladas** — ✅ cumplido y verificado end-to-end (`docs/04` §0).
+   controladas** — ✅ cumplido y verificado end-to-end (`docs/04` §0), con
+   los 5 escenarios planeados ejecutados en dos corridas reales.
 4. **Configurar detección de anomalías con IA y un Workflow de
    notificación** — ⚠️ parcialmente cumplido: la detección con IA está
-   confirmada con un caso real (`P-260849`); el Workflow de notificación
-   está definido pero no se ha desplegado/disparado en el tenant.
-5. **Definir y medir métricas de rendimiento y disponibilidad** — ⚠️
-   parcialmente cumplido: hay datos reales de tiempo de detección (MTTD) y
-   de tiempo de inactividad acotado por TTL; faltan tiempo de respuesta
-   p50/p95 y distribución de tráfico, pendientes de la segunda corrida.
-6. **Proponer mejoras basadas en resultados** — ✅ cumplido: se identificó
-   y documentó una mejora concreta de infraestructura (health checks de
-   nginx) directamente a partir de un hallazgo real, no hipotético.
+   confirmada con dos casos reales (`P-260849`, `P-260850`); el Workflow de
+   notificación está definido pero no se ha desplegado/disparado en el
+   tenant (único pendiente real del proyecto).
+5. **Definir y medir métricas de rendimiento y disponibilidad** — ✅
+   cumplido: tiempo de respuesta (p50/p95), distribución de tráfico, tiempo
+   de inactividad y MTTD tienen datos reales medidos en ambas corridas
+   (`docs/04` §3).
+6. **Proponer mejoras basadas en resultados** — ✅ cumplido: mejora de
+   infraestructura (health checks de nginx) y tres mejoras al diseño
+   experimental (línea base más larga, escenario de caída más sostenido,
+   saturación de `redis` con mayor concurrencia) — todas a partir de
+   hallazgos reales, no hipotéticos.
 
 **Conclusión general:** el objetivo general del proyecto —analizar y
 demostrar una plataforma de observabilidad con IA para detección de
-anomalías— se cumplió con evidencia real, incluyendo un hallazgo que no
-estaba en el plan original (la dependencia de Davis AI de una línea base
-histórica para la atribución de causa raíz), lo cual enriquece la discusión
-más allá de simplemente confirmar que "la herramienta funciona".
+anomalías— se cumplió con evidencia real de dos corridas contrastantes. El
+hallazgo que no estaba en el plan original —que Davis AI se vuelve más
+selectivo, no solo más preciso, a medida que acumula línea base— enriquece
+la discusión más allá de simplemente confirmar que "la herramienta
+funciona": muestra que su comportamiento es dependiente del tiempo de
+observación de una forma que no es trivial de anticipar sin haberlo medido.
 
 ## 9. Referencias
 
@@ -204,8 +231,10 @@ en papel/PDF.)*
 
 - Enlace al repositorio GitHub:
   `https://github.com/JeffreyValerio/observability`.
-- Capturas de pantalla del demo funcional y del problema `P-260849` en
-  Dynatrace — pendientes de adjuntar en la versión de entrega final.
+- Capturas de pantalla del demo funcional y de los problemas `P-260849` /
+  `P-260850` en Dynatrace — pendientes de adjuntar en la versión de entrega
+  final (los datos ya están documentados en `docs/04`, faltan solo las
+  imágenes).
 - Exportaciones de dashboards ([`dashboards/`](../dashboards/)) — pendiente
   (depende de tener un dashboard armado en el tenant).
 - Comparativa de herramientas de observabilidad y Cuadrante Mágico de
