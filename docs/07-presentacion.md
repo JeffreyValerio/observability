@@ -1,8 +1,9 @@
 # Guion de presentación (5–10 minutos)
 
-**Estado:** ✅ Esqueleto listo como insumo para diseño de slides (contenido
-final; falta solo capturas/resultados reales de la Semana 14 y el diseño
-visual).
+**Estado:** ✅ Contenido cerrado con resultados reales (corrida del 16 de
+agosto de 2026 contra un tenant real de Dynatrace). Solo falta el diseño
+visual de las slides y, si da tiempo antes de exponer, las capturas de
+pantalla de Dynatrace mencionadas en la slide 6.
 
 Este documento es el **guion**, no las diapositivas. Está pensado para
 entregarse a una herramienta de diseño (Canva u otra) que genere las slides
@@ -59,27 +60,46 @@ distribuidos en 9 slides.
 - Métricas: tiempo de respuesta, distribución de tráfico, tiempo de
   inactividad, tiempo de detección (MTTD).
 
-## Slide 6 — Resultados (90s) — completar con datos reales de la Semana 14
+## Slide 6 — Resultados (90s)
 
-- Tabla/gráfico de resultados (traer de
-  [`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#3-resultados)
-  cuando esté lleno con datos reales).
-- Captura de pantalla de un problema abierto por Davis AI (con causa raíz
-  señalada).
-- Captura del Workflow de notificación disparándose.
-- ⚠️ **Pendiente:** esta slide no se puede finalizar hasta correr los
-  experimentos de la Semana 14 en tu tenant.
+Línea de tiempo real, tomada de la API de Dynatrace (16 de agosto de 2026,
+detalle en
+[`docs/04-desarrollo-resultados.md`](04-desarrollo-resultados.md#31-primera-corrida-real-contra-dynatrace-16-de-agosto-de-2026)):
+
+- `23:47:40` — se levanta el stack (`frontend` + 3 réplicas de `app` +
+  `redis` + `load-generator`).
+- `23:48:20` — **Davis AI abre `P-260849 "High Memory"`**: detección en
+  **~40 segundos**.
+- `23:51:06` — caos explícito (`/chaos/cpu`, `/chaos/memory`): 2 de 3
+  réplicas al 100%+ de CPU, una reteniendo ~1 GB de memoria (confirmado con
+  `docker stats`).
+- Captura de pantalla: el problema `P-260849` en Dynatrace (pendiente de
+  adjuntar antes de exponer).
+- **Punto honesto para decir en voz alta:** la causa raíz quedó atribuida
+  al host completo, no al contenedor específico — porque las entidades
+  eran nuevas y no tenían línea base. Esto **no es un fallo del proyecto**,
+  es un hallazgo real sobre cómo funciona la IA causal.
 
 ## Slide 7 — Discusión (45s)
 
-- Qué anomalías detectó bien Davis AI, cuáles no (de
+- Hallazgo central: Davis AI detecta rápido (~40s), pero la **atribución de
+  causa raíz de calidad depende de tener línea base histórica** — matiza la
+  promesa de "detección desde el minuto uno" que suelen vender estas
+  herramientas (de
   [`docs/05-informe-final.md`](05-informe-final.md#7-discusión-y-mejoras-propuestas)).
-- Una mejora concreta propuesta a la arquitectura.
+- Mejora concreta ya identificada: nginx solo deja de enrutar a una réplica
+  caída cuando expira el TTL del resolver DNS (10s) — se registró un
+  `upstream timed out` real. Propuesta: *passive health checks*.
 
 ## Slide 8 — Conclusiones (30s)
 
-- Retomar cada objetivo específico y decir en una línea si se cumplió.
-- Repositorio GitHub + licencia MIT + demo funcional como evidencia.
+- De los 6 objetivos específicos: **3 cumplidos completamente**, **2
+  parcialmente** (faltan p50/p95 y distribución de tráfico de una segunda
+  corrida con línea base; falta disparar el Workflow de notificación), **1
+  cumplido** (mejora propuesta a partir de un hallazgo real). Detalle en
+  [`docs/05-informe-final.md`](05-informe-final.md#8-conclusiones).
+- Repositorio GitHub + licencia MIT + demo funcional y verificado
+  end-to-end como evidencia.
 
 ## Slide 9 — Cierre / preguntas (10s)
 
